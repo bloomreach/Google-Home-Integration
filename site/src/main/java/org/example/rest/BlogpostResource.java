@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.services.dialogflow.v2beta1.model.WebhookRequest;
 import com.google.api.services.dialogflow.v2beta1.model.WebhookResponse;
 
@@ -46,8 +47,8 @@ public class BlogpostResource extends BaseRestResource {
     @Path("/")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public WebhookResponse index(@RequestBody WebhookBody webhookBody) {
-        log.error("Testing: {}", webhookBody==null ? "null": webhookBody.toString());
+    public WebhookResponse index(  GenericJson webhookRequest) {
+        log.error("Testing: {}", webhookRequest==null ? "null": webhookRequest.toString());
         return new WebhookResponse();
     }
 
