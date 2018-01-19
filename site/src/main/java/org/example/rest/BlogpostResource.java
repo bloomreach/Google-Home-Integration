@@ -46,8 +46,8 @@ public class BlogpostResource extends BaseRestResource {
     @Path("/")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public WebhookResponse index(@RequestBody WebhookRequest webhookRequest) {
-        log.error("Testing: {}", webhookRequest==null ? "null": webhookRequest.toString());
+    public WebhookResponse index(@RequestBody WebhookBody webhookBody) {
+        log.error("Testing: {}", webhookBody==null ? "null": webhookBody.toString());
         return new WebhookResponse();
     }
 
