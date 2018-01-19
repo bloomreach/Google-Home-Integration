@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
  * @version "$Id$"
  */
 
-@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.APPLICATION_FORM_URLENCODED})
+@Produces({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON})
 @Path("/Blogpost/")
 public class BlogpostResource extends BaseRestResource {
 
@@ -43,9 +43,9 @@ public class BlogpostResource extends BaseRestResource {
     @POST
     @Path("/")
     @Consumes({ MediaType.APPLICATION_JSON })
-    /*@Produces(MediaType.APPLICATION_JSON)*/
-    public WebhookResponse index(WebhookRequest webhookRequest, WebhookResponse webhookResponse) {
-        log.info("Testing: {}", webhookResponse.getSource());
+    @Produces(MediaType.APPLICATION_JSON)
+    public WebhookResponse index(WebhookResponse webhookResponse) {
+        log.error("Testing: {}", webhookResponse ==null ? "null": webhookResponse.toString());
         return webhookResponse;
     }
 
