@@ -1,5 +1,7 @@
 package org.example.rest;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -46,8 +48,8 @@ public class BlogpostResource extends BaseRestResource {
     @Path("/")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public WebhookResponse index(@RequestBody WebhookBody webhookBody) {
-        log.error("Testing: {}", webhookBody==null ? "null": webhookBody.toString());
+    public WebhookResponse index(com.google.api.client.json.GenericJson webhookRequest) throws IOException {
+        log.debug(webhookRequest.toPrettyString());
         return new WebhookResponse();
     }
 
