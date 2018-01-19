@@ -11,6 +11,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import com.google.api.services.dialogflow.v2beta1.model.WebhookRequest;
+import com.google.api.services.dialogflow.v2beta1.model.WebhookResponse;
+
 import org.onehippo.cms7.essentials.components.paging.Pageable;
 import org.onehippo.cms7.essentials.components.rest.BaseRestResource;
 import org.onehippo.cms7.essentials.components.rest.ctx.DefaultRestContext;
@@ -41,8 +44,9 @@ public class BlogpostResource extends BaseRestResource {
     @Path("/")
     @Consumes({ MediaType.APPLICATION_JSON })
     /*@Produces(MediaType.APPLICATION_JSON)*/
-    public void index(WebhookBody webhookBody) {
-        log.info("Testing: {}", webhookBody.toString());
+    public WebhookResponse index(WebhookRequest webhookRequest, WebhookResponse webhookResponse) {
+        log.info("Testing: {}", webhookResponse.getSource());
+        return webhookResponse;
     }
 
     @GET
