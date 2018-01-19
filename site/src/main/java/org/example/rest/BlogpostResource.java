@@ -20,6 +20,8 @@ import org.onehippo.cms7.essentials.components.rest.ctx.DefaultRestContext;
 import org.example.beans.Blogpost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @version "$Id$"
@@ -44,9 +46,9 @@ public class BlogpostResource extends BaseRestResource {
     @Path("/")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public WebhookResponse index(WebhookResponse webhookResponse) {
-        log.error("Testing: {}", webhookResponse ==null ? "null": webhookResponse.toString());
-        return webhookResponse;
+    public WebhookResponse index(@RequestBody WebhookRequest webhookRequest) {
+        log.error("Testing: {}", webhookRequest==null ? "null": webhookRequest.toString());
+        return new WebhookResponse();
     }
 
     @GET
