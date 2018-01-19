@@ -125,6 +125,8 @@
     <!-- project logging -->
     <Logger name="org.example" level="debug"/>
 
+    <Logger name="org.apache.cxf.interceptor.LoggingInInterceptor" level="info"/>
+
     <Root level="warn">
       <AppenderRef ref="site"/>
       <AppenderRef ref="cms"/>
