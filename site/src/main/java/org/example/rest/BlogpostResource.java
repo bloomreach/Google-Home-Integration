@@ -49,7 +49,7 @@ public class BlogpostResource extends BaseRestResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     public WebhookResponse index(com.google.api.client.json.GenericJson webhookRequest) throws IOException {
-        log.debug(webhookRequest.toPrettyString());
+        log.error(webhookRequest.toPrettyString());
         return new WebhookResponse();
     }
 
