@@ -40,9 +40,9 @@ public class BlogpostResource extends BaseRestResource {
     @POST
     @Path("/")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces(MediaType.APPLICATION_JSON)
+    /*@Produces(MediaType.APPLICATION_JSON)*/
     public void index(WebhookBody webhookBody) {
-        log.error("Testing: ", webhookBody.getAction());
+        log.info("Testing: {}", webhookBody.toString());
     }
 
     @GET
