@@ -1,21 +1,26 @@
 package org.example.rest;
 
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.google.api.services.dialogflow.v2beta1.model.QueryResult;
 
 @XmlRootElement
 public class WebhookBody {
 
     private String session;
     private String responseId;
+    private QueryResult queryResult;
+    private Object originalDetectIntentRequest;
 
 
-/*
 
-    {"responseId":"e5448ebe-79b4-4c9a-b232-cd927ac85c06",
+
+ /*   {"responseId":"e5448ebe-79b4-4c9a-b232-cd927ac85c06",
             "queryResult":{
         "queryText":"create a new document",
                 "action":"input.title",
@@ -27,7 +32,6 @@ public class WebhookBody {
 */
 
 
-
     @Override
     public String toString() {
         return "WebhookBody{" +
@@ -35,7 +39,6 @@ public class WebhookBody {
                 ", responseId='" + responseId + '\'' +
                 '}';
     }
-
 
     @XmlElement
     public String getSession() {
@@ -47,5 +50,13 @@ public class WebhookBody {
         return responseId;
     }
 
+
+    public QueryResult getQueryResult() {
+        return queryResult;
+    }
+
+    public Object getOriginalDetectIntentRequest() {
+        return originalDetectIntentRequest;
+    }
 
 }

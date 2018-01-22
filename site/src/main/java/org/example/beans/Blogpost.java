@@ -2,6 +2,10 @@ package org.example.beans;
 
 import java.util.Calendar;
 import java.util.List;
+
+import org.apache.jackrabbit.commons.JcrUtils;
+import org.hippoecm.hst.content.beans.ContentNodeBinder;
+import org.hippoecm.hst.content.beans.ContentNodeBindingException;
 import org.hippoecm.hst.content.beans.Node;
 import org.hippoecm.hst.content.beans.standard.HippoDocument;
 import org.hippoecm.hst.content.beans.standard.HippoHtml;
@@ -13,27 +17,38 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.onehippo.cms7.essentials.components.rest.adapters.HippoHtmlAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlRootElement(name = "blogpost")
 @XmlAccessorType(XmlAccessType.NONE)
 @HippoEssentialsGenerated(internalName = "myhippoproject:blogpost")
 @Node(jcrType = "myhippoproject:blogpost")
-public class Blogpost extends HippoDocument implements Authors {
-    public static final String TITLE = "myhippoproject:title";
-    public static final String INTRODUCTION = "myhippoproject:introduction";
+public class Blogpost extends HippoDocument implements Authors, ContentNodeBinder {
+
+    private static final Logger log = LoggerFactory.getLogger(Blogpost.class);
+
+    private static final String TITLE = "myhippoproject:title";
+    private static final String INTRODUCTION = "myhippoproject:introduction";
     public static final String CONTENT = "myhippoproject:content";
-    public static final String PUBLICATION_DATE = "myhippoproject:publicationdate";
+    private static final String PUBLICATION_DATE = "myhippoproject:publicationdate";
     public static final String CATEGORIES = "myhippoproject:categories";
-    public static final String AUTHOR = "myhippoproject:author";
+    private static final String AUTHOR = "myhippoproject:author";
     public static final String AUTHOR_NAMES = "myhippoproject:authornames";
     public static final String LINK = "myhippoproject:link";
     public static final String AUTHORS = "myhippoproject:authors";
     public static final String TAGS = "hippostd:tags";
 
+    private String title;
+    private String introduction;
+    private Calendar publicationDate;
+
+
+
     @XmlElement
     @HippoEssentialsGenerated(internalName = "myhippoproject:publicationdate")
     public Calendar getPublicationDate() {
-        return getProperty(PUBLICATION_DATE);
+        return (publicationDate == null) ? getProperty(PUBLICATION_DATE) : publicationDate;
     }
 
     @XmlElement
@@ -54,7 +69,19 @@ public class Blogpost extends HippoDocument implements Authors {
     @XmlElement
     @HippoEssentialsGenerated(internalName = "myhippoproject:title")
     public String getTitle() {
-        return getProperty(TITLE);
+        return (title == null) ? getProperty(TITLE): title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setIntroduction(String introduction){
+        this.introduction = introduction;
+    }
+
+    public void setPublicationDate(Calendar publicationDate){
+        this.publicationDate = publicationDate;
     }
 
     @XmlJavaTypeAdapter(HippoHtmlAdapter.class)
@@ -67,7 +94,7 @@ public class Blogpost extends HippoDocument implements Authors {
     @XmlElement
     @HippoEssentialsGenerated(internalName = "myhippoproject:introduction")
     public String getIntroduction() {
-        return getProperty(INTRODUCTION);
+        return (introduction == null) ? getProperty(INTRODUCTION): introduction;
     }
 
     @XmlElement
@@ -80,5 +107,29 @@ public class Blogpost extends HippoDocument implements Authors {
     @HippoEssentialsGenerated(internalName = "myhippoproject:authors")
     public List<Author> getAuthors() {
         return getLinkedBeans(AUTHORS, Author.class);
+    }
+
+    @Override
+    public boolean bind(Object content, javax.jcr.Node node) throws ContentNodeBindingException {
+        if (content instanceof Blogpost) {
+            try {
+                Blogpost blogpost = (Blogpost) content;
+
+                node.setProperty(TITLE, blogpost.getTitle());
+                node.setProperty(INTRODUCTION, blogpost.getIntroduction());
+                node.setProperty(PUBLICATION_DATE, blogpost.getPublicationDate());
+
+
+               /* javax.jcr.Node linkNode = JcrUtils.getOrAddNode(node, "myhippoproject:authors", "hippo:mirror");
+                linkNode.setProperty("hippo:docbase", blogpost.getAuthor());
+*/
+
+            } catch (Exception e) {
+                log.error("Unable to bind the content to the JCR Node" + e.getMessage(), e);
+                throw new ContentNodeBindingException(e);
+            }
+            return true;
+        }
+        return false;
     }
 }
