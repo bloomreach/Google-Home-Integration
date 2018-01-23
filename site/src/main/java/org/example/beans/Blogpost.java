@@ -119,10 +119,9 @@ public class Blogpost extends HippoDocument implements Authors, ContentNodeBinde
                 node.setProperty(INTRODUCTION, blogpost.getIntroduction());
                 node.setProperty(PUBLICATION_DATE, blogpost.getPublicationDate());
 
+                javax.jcr.Node linkNode = JcrUtils.getOrAddNode(node, "myhippoproject:authors", "hippo:mirror");
+                linkNode.setProperty("hippo:docbase", "5a6e1136-dea0-4927-9130-9ce0a47b0189");
 
-               /* javax.jcr.Node linkNode = JcrUtils.getOrAddNode(node, "myhippoproject:authors", "hippo:mirror");
-                linkNode.setProperty("hippo:docbase", blogpost.getAuthor());
-*/
 
             } catch (Exception e) {
                 log.error("Unable to bind the content to the JCR Node" + e.getMessage(), e);

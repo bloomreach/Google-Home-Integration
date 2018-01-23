@@ -157,7 +157,7 @@ public class BlogpostResource extends BaseRestResource {
                 }
             });
 
-            final String documentPath = wpm.createAndReturn("/content/documents/myhippoproject/blog", "myhippoproject:blogpost", parsedTitle, true);
+            final String documentPath = wpm.createAndReturn("/content/documents/myhippoproject/blog/2018/01", "myhippoproject:blogpost", parsedTitle, true);
 
             final Blogpost blogpost = (Blogpost) wpm.getObject(documentPath);
 
