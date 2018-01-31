@@ -7,16 +7,12 @@ import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import com.google.api.services.dialogflow.v2beta1.model.IntentMessage;
-import com.google.api.services.dialogflow.v2beta1.model.WebhookResponse;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -40,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
-@Path("/Blogpost/")
+@Path("/brcms/")
 public class BlogpostResource extends BaseRestResource {
 
     private static Logger log = LoggerFactory.getLogger(BlogpostResource.class);
@@ -75,6 +71,30 @@ public class BlogpostResource extends BaseRestResource {
                 }
 
                 JsonElement queryText = queryRes.get("queryText");
+                JsonElement fulfillmentText = queryRes.get("fulfillmentText");
+
+                if (displayName.getAsString().toLowerCase().contains("create") &&
+                        displayName.getAsString().toLowerCase().contains("document") &&
+                        queryText != null &&
+                        !queryText.toString().isEmpty() &&
+                        queryText.toString().toLowerCase().contains("create") &&
+                        queryText.toString().toLowerCase().contains("document")
+                        ) {
+
+                    return "{\n" +
+                            "  \"fulfillmentText\": \"What is the title of the document?\", \n" +
+                            "  \"fulfillmentMessages\": [\n" +
+                            "  {\n" +
+                            "    \"text\": {\n" +
+                            "      \"text\": [\n\"" +
+                            "           \"What is the title of the document?\"       " +
+                            "\"      ]\n" +
+                            "    }\n" +
+                            "  }\n" +
+                            "  ]\n" +
+                            "}";
+
+                }
 
                 if (displayName.getAsString().toLowerCase().contains("create") &&
                         displayName.getAsString().toLowerCase().contains("document") &&
@@ -83,71 +103,78 @@ public class BlogpostResource extends BaseRestResource {
                         !queryText.toString().toLowerCase().contains("create") &&
                         !queryText.toString().toLowerCase().contains("document")
                         ) {
-                    createDocumet(queryText.toString(), request);
+                    createDocument(queryText.toString(), request);
+
+                    String responseMessage = "Cool! I just created a blogpost document with title " + queryText.toString().replace("\"", " ");
+
+
+                    return "{\n" +
+                            "  \"fulfillmentText\": \""+responseMessage+"\", \n" +
+                            "  \"fulfillmentMessages\": [\n" +
+                            "  {\n" +
+                            "    \"text\": {\n" +
+                            "      \"text\": [\""+responseMessage+"\"]\n" +
+                            "    }\n" +
+                            "  }\n" +
+                            "  ]\n" +
+                            "};";
+
                 }
 
-                JsonElement fulfillmentText = queryRes.get("fulfillmentText");
+                if (displayName.getAsString().toLowerCase().contains("how") &&
+                        displayName.getAsString().toLowerCase().contains("many") &&
+                        (displayName.getAsString().toLowerCase().contains("documents") || displayName.getAsString().toLowerCase().contains("blogposts")) &&
+                        queryText != null &&
+                        !queryText.toString().isEmpty() &&
+                        queryText.toString().toLowerCase().contains("how") &&
+                        queryText.toString().toLowerCase().contains("many") &&
+                        (queryText.toString().toLowerCase().contains("documents") || queryText.toString().toLowerCase().contains("blogposts"))
+                        ) {
+                    Long docNumber = getDocumentCount(request);
+                    String responseMessage = "There are ";
+                    if (docNumber.toString().isEmpty() || docNumber.toString() == null) {
+                        responseMessage = responseMessage.concat("zero");
+                    } else {
+                        responseMessage = responseMessage.concat(docNumber.toString());
+                    }
+                    responseMessage = responseMessage.concat(" published blogpost documents");
 
+                    String response = "{\"fulfillmentText\": \"" + responseMessage +"\", \n" +
+                            " \"fulfillmentMessages\": [{\"text\": { \"text\": [ \"" + responseMessage + "\" ]}}]}";
+
+                    return response;
+                }
             }
         }
 
-
-// Returning a dummy WebhookResponse
         return "{\n" +
-                "  \"result\": {\n" +
-                "    \"source\": \"agent\",\n" +
-                "    \"resolvedQuery\": \"city\",\n" +
-                "    \"action\": \"tell.facts\",\n" +
-                "    \"actionIncomplete\": false,\n" +
-                "    \"parameters\": {\n" +
-                "      \"facts-category\": \"city\"\n" +
-                "    },\n" +
-                "    \"contexts\": [],\n" +
-                "    \"metadata\": {\n" +
-                "      \"intentId\": \"873b1895-cdfc-42a4-b61b-5a1703c72a4d\",\n" +
-                "      \"webhookUsed\": \"true\",\n" +
-                "      \"webhookForSlotFillingUsed\": \"false\",\n" +
-                "      \"webhookResponseTime\": 417,\n" +
-                "      \"intentName\": \"tell-facts\"\n" +
-                "    },\n" +
-                "    \"fulfillment\": {\n" +
-                "      \"speech\": \"Amsterdam\",\n" +
-                "      \"messages\": [\n" +
-                "        {\n" +
-                "          \"type\": 0,\n" +
-                "          \"speech\": \"Amsterdam\"\n" +
-                "        }\n" +
+                "  \"fulfillmentText\": \"Sorry, I couldn't understand\" \n" +
+                "  \"fulfillmentMessages\": [\n" +
+                "  {\n" +
+                "    \"text\": {\n" +
+                "      \"text\": [\n" +
+                "           \"Sorry, I couldn\'t  understand.\" " +
                 "      ]\n" +
-                "    },\n" +
-                "    \"score\": 1\n" +
+                "    }\n" +
                 "  }\n" +
+                "  ]\n" +
                 "}";
     }
 
-    @GET
-    @Path("/page/{page}")
-    public Pageable<Blogpost> page(@Context HttpServletRequest request, @PathParam("page") int page) {
-        return findBeans(new DefaultRestContext(this, request, page, DefaultRestContext.PAGE_SIZE), Blogpost.class);
+
+    private Long getDocumentCount(HttpServletRequest request) {
+        Pageable<Blogpost> pageable = findBeans(new DefaultRestContext(this, request, 1, 1), Blogpost.class);
+        return pageable.getTotal();
     }
 
-    @GET
-    @Path("/page/{page}/{pageSize}")
-    public Pageable<Blogpost> pageForSize(@Context HttpServletRequest request, @PathParam("page") int page, @PathParam("pageSize") int pageSize) {
-        return findBeans(new DefaultRestContext(this, request, page, pageSize), Blogpost.class);
-    }
-
-
-    private void createDocumet(String parsedTitle, HttpServletRequest request) {
-
+    private void createDocument(String parsedTitle, HttpServletRequest request) {
+        parsedTitle = parsedTitle.replace("\"", "");
+        parsedTitle = parsedTitle.substring(0, 1).toUpperCase() + parsedTitle.substring(1);
         WorkflowPersistenceManagerImpl wpm = null;
         try {
 
             char[] password = "admin".toCharArray();
-
             final Session session = this.getPersistableSession(this.getRequestContext(request), new SimpleCredentials("admin", password));
-            /* session = session.impersonate(new SimpleCredentials(session.getUserID(), new char[0]));*/
-
-
             wpm = new WorkflowPersistenceManagerImpl(session, RequestContextProvider.get().getContentBeansTool().getObjectConverter(), null);
 
 
@@ -169,8 +196,6 @@ public class BlogpostResource extends BaseRestResource {
             populateBlogpost(currentDate, parsedTitle, blogpost);
             wpm.update(blogpost);
             wpm.save();
-
-            log.debug("A new document was added at " + blogpost.getPath());
 
         } catch (Exception e) {
             log.error("Failed to persist document: {}", e.getMessage(), e);
