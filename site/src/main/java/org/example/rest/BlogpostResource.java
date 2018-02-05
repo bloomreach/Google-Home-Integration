@@ -3,6 +3,8 @@ package org.example.rest;
 import java.io.IOException;
 import java.util.Calendar;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 import javax.servlet.http.HttpServletRequest;
@@ -18,10 +20,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.example.beans.Blogpost;
+import org.example.beans.NewsDocument;
 import org.hippoecm.hst.container.RequestContextProvider;
 import org.hippoecm.hst.content.beans.ObjectBeanPersistenceException;
 import org.hippoecm.hst.content.beans.manager.workflow.BaseWorkflowCallbackHandler;
 import org.hippoecm.hst.content.beans.manager.workflow.WorkflowPersistenceManagerImpl;
+import org.hippoecm.hst.content.beans.query.HstQuery;
+import org.hippoecm.hst.content.beans.query.exceptions.QueryException;
 import org.hippoecm.hst.core.component.HstComponentException;
 import org.onehippo.cms7.essentials.components.paging.Pageable;
 import org.onehippo.cms7.essentials.components.rest.BaseRestResource;
@@ -39,7 +44,21 @@ import org.slf4j.LoggerFactory;
 @Path("/brcms/")
 public class BlogpostResource extends BaseRestResource {
 
+    public static final String TEXT_PREFIX = "{\n" +
+            "  \"fulfillmentText\": \"";
+    public static final String TEXT_SUFFIX_MESSAGE = "\", \n" +
+            "  \"fulfillmentMessages\": [\n" +
+            "  {\n" +
+            "    \"text\": {\n" +
+            "      \"text\": [\"";
+    public static final String MESSAGE_SUFFIX = "\"]\n" +
+            "    }\n" +
+            "  }\n" +
+            "  ]\n" +
+            "};";
     private static Logger log = LoggerFactory.getLogger(BlogpostResource.class);
+
+
 
     @POST
     @Path("/")
@@ -80,19 +99,7 @@ public class BlogpostResource extends BaseRestResource {
                         queryText.toString().toLowerCase().contains("create") &&
                         queryText.toString().toLowerCase().contains("document")
                         ) {
-
-                    return "{\n" +
-                            "  \"fulfillmentText\": \"What is the title of the document?\", \n" +
-                            "  \"fulfillmentMessages\": [\n" +
-                            "  {\n" +
-                            "    \"text\": {\n" +
-                            "      \"text\": [\n\"" +
-                            "           \"What is the title of the document?\"       " +
-                            "\"      ]\n" +
-                            "    }\n" +
-                            "  }\n" +
-                            "  ]\n" +
-                            "}";
+                    return TEXT_PREFIX + "\"What is the title of the document?\"" + TEXT_SUFFIX_MESSAGE + "\"What is the title of the document?\"" + MESSAGE_SUFFIX;
 
                 }
 
@@ -108,22 +115,11 @@ public class BlogpostResource extends BaseRestResource {
                     String responseMessage = "Cool! I just created a blogpost document with title " + queryText.toString().replace("\"", " ");
 
 
-                    return "{\n" +
-                            "  \"fulfillmentText\": \""+responseMessage+"\", \n" +
-                            "  \"fulfillmentMessages\": [\n" +
-                            "  {\n" +
-                            "    \"text\": {\n" +
-                            "      \"text\": [\""+responseMessage+"\"]\n" +
-                            "    }\n" +
-                            "  }\n" +
-                            "  ]\n" +
-                            "};";
+                    return TEXT_PREFIX + responseMessage + TEXT_SUFFIX_MESSAGE + responseMessage + MESSAGE_SUFFIX;
 
                 }
 
-                if (displayName.getAsString().toLowerCase().contains("how") &&
-                        displayName.getAsString().toLowerCase().contains("many") &&
-                        (displayName.getAsString().toLowerCase().contains("documents") || displayName.getAsString().toLowerCase().contains("blogposts")) &&
+                if (displayName.getAsString().toLowerCase().contains("published blogposts") &&
                         queryText != null &&
                         !queryText.toString().isEmpty() &&
                         queryText.toString().toLowerCase().contains("how") &&
@@ -139,26 +135,45 @@ public class BlogpostResource extends BaseRestResource {
                     }
                     responseMessage = responseMessage.concat(" published blogpost documents");
 
-                    String response = "{\"fulfillmentText\": \"" + responseMessage +"\", \n" +
-                            " \"fulfillmentMessages\": [{\"text\": { \"text\": [ \"" + responseMessage + "\" ]}}]}";
-
-                    return response;
+                    return TEXT_PREFIX + responseMessage + TEXT_SUFFIX_MESSAGE + responseMessage + MESSAGE_SUFFIX;
                 }
+
+
+                if (displayName.getAsString().toLowerCase().contains("latest") &&
+                        displayName.getAsString().toLowerCase().contains("news") &&
+                        queryText != null &&
+                        !queryText.toString().isEmpty() &&
+                        queryText.toString().toLowerCase().contains("latest") &&
+                        queryText.toString().toLowerCase().contains("news")
+                        ) {
+                    String newsTitle = retrieveLatestNews(request);
+
+                    String responseMessage = "The title of the latest news article is " + newsTitle;
+
+                    return TEXT_PREFIX + responseMessage + TEXT_SUFFIX_MESSAGE + responseMessage + MESSAGE_SUFFIX;
+
+                }
+
             }
         }
 
-        return "{\n" +
-                "  \"fulfillmentText\": \"Sorry, I couldn't understand\" \n" +
-                "  \"fulfillmentMessages\": [\n" +
-                "  {\n" +
-                "    \"text\": {\n" +
-                "      \"text\": [\n" +
-                "           \"Sorry, I couldn\'t  understand.\" " +
-                "      ]\n" +
-                "    }\n" +
-                "  }\n" +
-                "  ]\n" +
-                "}";
+        return TEXT_PREFIX + "\"Sorry, I could not understand\"" + TEXT_SUFFIX_MESSAGE + "\"Sorry, I could not understand\"" + MESSAGE_SUFFIX;
+    }
+
+    private String retrieveLatestNews(HttpServletRequest request){
+        try {
+            //Session session = this.getPersistableSession(getRequestContext(request));
+            Node newsNode = this.getScope(request, "news");
+            HstQuery query = RequestContextProvider.get().getQueryManager().createQuery(newsNode, NewsDocument.class);
+            query.addOrderByDescending("myhippoproject:date");
+            NewsDocument latestNewsBean = getSingleBean(query);
+            return latestNewsBean.getTitle();
+
+        } catch (RepositoryException | QueryException e) {
+            log.error("Failed to retrieve latest news: {}", e.getMessage(), e);
+        }
+
+        return "";
     }
 
 
