@@ -13,7 +13,7 @@
       <list>
         <bean class="org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider">
           <constructor-arg>
-            <bean class="org.example.rest.BlogpostResource"/>
+            <bean class="org.example.rest.GoogleResource"/>
           </constructor-arg>
         </bean>
       </list>
